@@ -59,7 +59,7 @@ test('Проверка перехода в каталог по кнопке Ко
     }
 });
 
-test('Проверка закрытия плаки кук', async ({page}) => {
+test('Проверка закрытия плашки кук', async ({page}) => {
     await page.goto('')
     await expect.soft(page.getByTestId('cookie-consent-banner')).toBeVisible()
     await page.getByTestId('cookie-accept-button').click()
