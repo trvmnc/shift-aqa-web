@@ -1,95 +1,58 @@
 import {test, expect} from '@playwright/test';
 import pages from '../data/pages.json';
 
-pages.forEach((testPage: {name: string, url: string}) => {
-    test(`Страница ${testPage.name}`, async ({page}) => {
+test('Проверка файла pages.json', async ({page}) => {
+    await page.goto('')
 
-        const width = await page.evaluate(() => window.innerWidth)
+    // находим все страницы на сайте
+    const everyLink = page.locator('a[href]')
+    const linkCount = await everyLink.count()
 
-        await page.goto(testPage.url);
+    const uniqueLink = new Set<string>()
 
-        if (testPage.url == '') {
-            await expect.soft(page.getByTestId('cookie-consent-banner')).toHaveScreenshot('Плашка кук.png')
-            await page.getByTestId('cookie-accept-button').click();
-
-            if (width <= 768) {
-                await page.getByTestId('header-burger-menu-button').click()
-                await expect.soft(page.getByTestId('header-mobile-menu')).toHaveScreenshot('Бургер меню.png')
-                await page.getByTestId('header-burger-menu-button').click()
-
-            }
-        } else {
-            await page.getByTestId('cookie-accept-button').click();
+    for (let i=0; i<linkCount; i++) {
+        const hrefTemp = await everyLink.nth(i).getAttribute('href')
+        if (hrefTemp) {     // в pages.json у главной url "", здесь "/", поэтому не совпадает
+            uniqueLink.add(hrefTemp)
         }
-
-        await expect.soft(page).toHaveScreenshot({
-            fullPage: true,
-            mask: [
-                page.locator('[data-testid^="catalog-product-price-prod-"]'),
-                page.getByTestId('feedback-captcha-image')
-            ]
-        });
-    })
-});  // не понял суть задания, нужно проверить соответствие скринов сайту? если так,
-     // то не понял чем это отличается от того, что на практике делали (от этого кода). 
-
-test('Недостающие страницы', async ({page}) => {
-    await page.goto('')
-    // скрин faq
-    await page.getByTestId('header-nav-link-faq').click()
-    await expect.soft(page).toHaveScreenshot('faq.png')
-
-    // скрин акций
-    await page.getByTestId('header-nav-link-promotions').click()
-    await expect.soft(page).toHaveScreenshot('promotions.png')
-})
-
-test('Пустая корзина', async ({page}) => {
-    await page.goto('')
-    await page.getByTestId('header-cart-button').click()
-    await expect.soft(page).toHaveScreenshot({
-        fullPage: true,
-        mask: [
-            page.getByTestId('feedback-captcha-image'),
-            page.getByTestId('cart-total-price')
-        ]
-    })
-})
-
-test('Корзина с товаром', async ({page}) => {
-    await page.goto('/catalog')
-    await page.getByTestId('catalog-add-to-cart-button-prod-001').click()
-    await page.getByTestId('catalog-add-to-cart-button-prod-001').click()
-    await page.getByTestId('header-cart-button').click();
-    await expect.soft(page).toHaveScreenshot('Корзина с товаром.png', {
-        fullPage: true,
-        mask: [
-            page.getByTestId('feedback-captcha-image'),
-            page.getByTestId('cart-total-price')
-        ]
-    })
-})
-
-test('FAQ, 1 вопрос раскрыт', async ({page}) => {
-    await page.goto('')
-    await page.getByTestId('header-nav-link-faq').click()
-    
-    await page.getByTestId('faq-question-1').click()
-
-    await expect.soft(page).toHaveScreenshot('faq.png')
-})
-
-test('FAQ, все вопросы раскрыты', async ({page}) => {
-    await page.goto('')
-    await page.getByTestId('header-nav-link-faq').click()
-    
-    // прокликать (открыть) все вопросы из faq
-    await page.waitForSelector('[data-testid^="faq-question-"]')
-    const faqQuestions = page.locator('[data-testid^="faq-question-"]')
-    const count = await faqQuestions.count()
-    for (let i = 0; i < count; i++) {
-        await faqQuestions.nth(i).click()
     }
 
-    await expect.soft(page).toHaveScreenshot('раскрытый faq.png')
-}) // вопросы все раскрывает, но все не попадают на скрин
+    console.log(uniqueLink)
+
+    // записываем те, что есть в pages.json
+
+    const pagesLink = new Set<string>()
+    
+    pages.forEach((testPage: {name: string, url: string}) => {
+        const href = testPage.url
+        pagesLink.add(href)
+    })
+
+    // проверяем соответствие pages.json найденным ссылкам
+
+    const missedInJson = new Set<string>()
+
+    for (const href of uniqueLink) {
+        if (!pagesLink.has(href)) {
+            missedInJson.add(href)
+        }
+    }
+
+    console.log(missedInJson)
+
+    await expect.soft(missedInJson).toHaveLength(0)
+
+    // по идее тут должен быть новый тест для скринов, но я не нашёл
+    // как переменную из этого теста использовать в другом
+
+    await page.goto('')
+
+    for (const url of missedInJson) {
+        await page.goto('url')
+        if (url == '/') {
+            await expect.soft(page).toHaveScreenshot('скрин главной.png')
+        } else {
+            await expect.soft(page).toHaveScreenshot(`скрин ${url}.png`)
+        }
+    }
+})
