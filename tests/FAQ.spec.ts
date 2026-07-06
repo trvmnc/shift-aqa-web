@@ -1,17 +1,17 @@
 import {test, expect} from '@playwright/test';
 
 test('FAQ, 1 вопрос раскрыт', async ({page}) => {
-    await page.goto('')
-    await page.getByTestId('header-nav-link-faq').click()
+    await page.goto('/faq')
     
     await page.getByTestId('faq-question-1').click()
 
-    await expect.soft(page).toHaveScreenshot('faq.png')
+    await expect.soft(page).toHaveScreenshot('faq.png', {
+        fullPage: true
+    })
 })
 
 test('FAQ, все вопросы раскрыты', async ({page}) => {
-    await page.goto('')
-    await page.getByTestId('header-nav-link-faq').click()
+    await page.goto('/faq')
     
     // прокликать (открыть) все вопросы из faq
     await page.waitForSelector('[data-testid^="faq-question-"]')
@@ -21,5 +21,7 @@ test('FAQ, все вопросы раскрыты', async ({page}) => {
         await faqQuestions.nth(i).click()
     }
 
-    await expect.soft(page).toHaveScreenshot('раскрытый faq.png')
+    await expect.soft(page).toHaveScreenshot('раскрытый faq.png', {
+        fullPage: true
+    })
 }) // вопросы все раскрывает, но все не попадают на скрин

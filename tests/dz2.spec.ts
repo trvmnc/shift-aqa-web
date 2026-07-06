@@ -50,9 +50,13 @@ test('Проверка файла pages.json', async ({page}) => {
     for (const url of missedInJson) {
         await page.goto('url')
         if (url == '/') {
-            await expect.soft(page).toHaveScreenshot('скрин главной.png')
+            await expect.soft(page).toHaveScreenshot('скрин главной.png', {
+                fullPage: true
+            })
         } else {
-            await expect.soft(page).toHaveScreenshot(`скрин ${url}.png`)
+            await expect.soft(page).toHaveScreenshot(`скрин ${url}.png`, {
+                fullPage: true
+            })
         }
     }
 })

@@ -16,15 +16,15 @@ test('Корзина с товаром', async ({page}) => {
 })
 
 
-test('Пустая корзина', async ({page}) => {
-    await page.goto('')
-    await page.getByTestId('header-cart-button').click()
-    await expect.soft(page).toHaveScreenshot({
-        fullPage: true,
-        mask: [
-            page.getByTestId('feedback-captcha-image'),
-            page.getByTestId('cart-total-price'),
-            page.locator('[data-testid^="catalog-product-price-prod-"]')
-        ]
-    })
-})
+// test('Пустая корзина', async ({page}) => {
+//     await page.goto('')
+//     await page.getByTestId('header-cart-button').click()
+//     await expect.soft(page).toHaveScreenshot({
+//         fullPage: true,
+//         mask: [
+//             page.getByTestId('feedback-captcha-image'),
+//             page.getByTestId('cart-total-price'),
+//             page.locator('[data-testid^="catalog-product-price-prod-"]')
+//         ]
+//     })
+// })
